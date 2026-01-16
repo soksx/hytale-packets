@@ -164,6 +164,13 @@ jobs:
 
           Write-Host "::notice::Successfully pushed to branch: $branchName"
 
+          # Set the new version branch as the default branch
+          Write-Host "Setting $branchName as the default branch..."
+          gh repo edit --default-branch $branchName
+          Write-Host "::notice::Default branch set to: $branchName"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Publish wiki to GitHub Wiki
         if: inputs.generate_wiki
         shell: bash
