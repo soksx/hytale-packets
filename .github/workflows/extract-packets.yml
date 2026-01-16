@@ -113,6 +113,28 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Clone existing wiki for merging
+        if: inputs.generate_wiki
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          repo="${{ github.repository }}"
+
+          # Create wiki directory
+          mkdir -p ./wiki
+
+          # Try to clone existing wiki to get current content
+          if git clone "https://x-access-token:${GH_TOKEN}@github.com/${repo}.wiki.git" ./existing-wiki 2>/dev/null; then
+            echo "Cloned existing wiki"
+            # Copy existing files to wiki directory (so generator can find existing versions)
+            cp -r ./existing-wiki/*.md ./wiki/ 2>/dev/null || echo "No existing MD files to copy"
+            echo "Existing wiki files:"
+            ls -la ./wiki/*.md 2>/dev/null || echo "No files yet"
+          else
+            echo "Wiki doesn't exist yet, starting fresh"
+          fi
+
       - name: Generate wiki documentation
         if: inputs.generate_wiki
         shell: pwsh
@@ -120,10 +142,8 @@ jobs:
           $version = "${{ inputs.version }}"
           Write-Host "Generating wiki documentation for version: $version"
 
-          # Create wiki directory
-          New-Item -ItemType Directory -Path "./wiki" -Force | Out-Null
-
           # Run the wiki generator (parses full protocol, documents packets with links to entities)
+          # Wiki directory already exists with any existing content from previous step
           python ./scripts/generate_wiki.py `
             --protocol-dir "./protocol" `
             --output-dir "./wiki" `

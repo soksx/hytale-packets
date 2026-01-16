@@ -794,9 +794,27 @@ class WikiGenerator:
 
         self._write_page(self._page_name('_Sidebar'), lines)
 
+    def _parse_existing_versions_from_home(self) -> set[str]:
+        """Parse existing versions from Home.md if it exists."""
+        versions = set()
+        root_home = self.output_dir / "Home.md"
+
+        if root_home.exists():
+            try:
+                content = root_home.read_text(encoding='utf-8')
+                # Match lines like "- [1.0.0](Version-1.0.0-Home)" or "- [beta-1](Version-beta-1-Home)"
+                version_link_pattern = re.compile(r'^\s*-\s*\[([^\]]+)\]\(Version-[^\)]+\)', re.MULTILINE)
+                for match in version_link_pattern.finditer(content):
+                    versions.add(match.group(1))
+                print(f"Found {len(versions)} existing versions in Home.md")
+            except Exception as e:
+                print(f"Warning: Could not parse existing Home.md: {e}")
+
+        return versions
+
     def _generate_root_home(self):
         """Generate the root home page with versions list."""
-        # Collect all version-specific home pages
+        # Collect versions from version-specific home pages
         versions = set()
         for file in self.output_dir.glob('Version-*-Home.md'):
             # Extract version from filename like "Version-1.0.0-Home.md"
@@ -804,6 +822,13 @@ class WikiGenerator:
             if len(parts) >= 3:
                 version = '-'.join(parts[1:-1])  # Everything between "Version" and "Home"
                 versions.add(version)
+
+        # Also parse existing Home.md for any versions that might be listed there
+        existing_versions = self._parse_existing_versions_from_home()
+        versions.update(existing_versions)
+
+        # Always add current version
+        versions.add(self.version)
 
         lines = [
             f"# Hytale Protocol Documentation",
@@ -831,15 +856,40 @@ class WikiGenerator:
         root_home.write_text('\n'.join(lines), encoding='utf-8')
         print(f"Generated: Home.md (root)")
 
+    def _parse_existing_versions_from_sidebar(self) -> set[str]:
+        """Parse existing versions from _Sidebar.md if it exists."""
+        versions = set()
+        root_sidebar = self.output_dir / "_Sidebar.md"
+
+        if root_sidebar.exists():
+            try:
+                content = root_sidebar.read_text(encoding='utf-8')
+                # Match lines like "- [1.0.0](Version-1.0.0-Home)" or "- [beta-1](Version-beta-1-Home)"
+                version_link_pattern = re.compile(r'^\s*-\s*\[([^\]]+)\]\(Version-[^\)]+\)', re.MULTILINE)
+                for match in version_link_pattern.finditer(content):
+                    versions.add(match.group(1))
+                print(f"Found {len(versions)} existing versions in _Sidebar.md")
+            except Exception as e:
+                print(f"Warning: Could not parse existing _Sidebar.md: {e}")
+
+        return versions
+
     def _generate_root_sidebar(self):
         """Generate the root sidebar."""
-        # Collect all version-specific home pages
+        # Collect versions from version-specific home pages
         versions = set()
         for file in self.output_dir.glob('Version-*-Home.md'):
             parts = file.stem.split('-')
             if len(parts) >= 3:
                 version = '-'.join(parts[1:-1])
                 versions.add(version)
+
+        # Also parse existing _Sidebar.md for any versions that might be listed there
+        existing_versions = self._parse_existing_versions_from_sidebar()
+        versions.update(existing_versions)
+
+        # Always add current version
+        versions.add(self.version)
 
         lines = [
             f"**[Home](Home)**",
