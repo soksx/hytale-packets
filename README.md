@@ -15,7 +15,7 @@ This project provides complete documentation of the **QUIC/UDP network protocol*
 
 - **Automated Extraction** — GitHub Actions workflow extracts protocol from any server version
 - **Version Tracking** — Each server version gets its own git branch with full source code
-- **Wiki Documentation** — Human-readable docs with packet IDs, fields, types, and constraints
+- **AI-Enhanced Wiki Documentation** — Human-readable docs with packet IDs, fields, types, and AI-generated descriptions
 - **Machine-Readable Output** — JSON summaries for tool integration and analysis
 - **Cross-Referenced Types** — Links between packets, enums, and data classes
 
@@ -142,7 +142,7 @@ python ./scripts/generate_wiki.py --protocol-dir "./protocol" --output-dir "./wi
 |-----------|------------|---------|
 | Extraction | PowerShell 7+ | Cross-platform JAR extraction and orchestration |
 | Decompilation | [Vineflower](https://github.com/Vineflower/vineflower) | Modern Fernflower fork for Java bytecode decompilation |
-| Documentation | Python 3.11+ | Parse Java sources and generate Markdown/JSON |
+| Documentation | TypeScript + LLM (OpenRouter) | Parse Java sources and generate AI-enhanced Markdown/JSON |
 | Automation | GitHub Actions | CI/CD pipeline for extraction and publishing |
 | Runtime | Java 21+ | Required for Vineflower decompiler |
 
@@ -168,6 +168,10 @@ Contributions are welcome! Areas where help is appreciated:
 - [Hytale Official](https://hytale.com) — Official game website
 - [Hytale Community Hub](https://hytale.com/news) — News and updates
 - [Vineflower](https://github.com/Vineflower/vineflower) — Java decompiler used by this project
+
+## Disclaimer
+
+> **AI-Generated Content Notice:** Parts of the wiki documentation, including packets layouts, are generated using AI. While we strive for accuracy, **AI-generated information may contain errors, inaccuracies, or misinterpretations** of the actual protocol behavior. Always verify critical information against the decompiled source code. Contributions to improve accuracy are welcome.
 
 ## License
 

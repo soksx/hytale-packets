@@ -31,3 +31,9 @@ temp/
 .idea/
 *.iml
 .vscode/
+
+# scripts/generate-wiki-ts (Node project)
+scripts/generate-wiki-ts/node_modules/
+scripts/generate-wiki-ts/dist/
+scripts/generate-wiki-ts/*.log
+scripts/generate-wiki-ts/.env

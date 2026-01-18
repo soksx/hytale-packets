@@ -108,10 +108,15 @@ jobs:
             "has_changes=false" >> $env:GITHUB_OUTPUT
           }
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          python-version: '3.11'
+          bun-version: latest
+
+      - name: Install wiki generator dependencies
+        if: inputs.generate_wiki
+        working-directory: ./scripts/generate-wiki-ts
+        run: bun install
 
       - name: Clone existing wiki for merging
         if: inputs.generate_wiki
@@ -137,20 +142,30 @@ jobs:
 
       - name: Generate wiki documentation
         if: inputs.generate_wiki
-        shell: pwsh
+        shell: bash
+        env:
+          OPENROUTER_KEY: ${{ secrets.OPENROUTER_KEY }}
         run: |
-          $version = "${{ inputs.version }}"
-          Write-Host "Generating wiki documentation for version: $version"
+          version="${{ inputs.version }}"
+          echo "Generating wiki documentation for version: $version"
 
-          # Run the wiki generator (parses full protocol, documents packets with links to entities)
-          # Wiki directory already exists with any existing content from previous step
-          python ./scripts/generate_wiki.py `
-            --protocol-dir "./protocol" `
-            --output-dir "./wiki" `
-            --version "$version" `
+          # Run the TypeScript wiki generator with Bun
+          # Key is passed via OPENROUTER_KEY env var (read by the script)
+          cd ./scripts/generate-wiki-ts
+
+          if [ -n "$OPENROUTER_KEY" ]; then
+            echo "OpenRouter API key detected - enabling AI layout analysis"
+          else
+            echo "No OpenRouter API key - skipping AI layout analysis"
+          fi
+
+          bun run src/generate-wiki.ts \
+            --protocol-dir "../../protocol" \
+            --output-dir "../../wiki" \
+            --version "$version" \
             --json
 
-          Write-Host "Wiki generation complete"
+          echo "Wiki generation complete"
 
       - name: Create version branch and commit
         if: steps.changes.outputs.has_changes == 'true'
@@ -162,6 +177,12 @@ jobs:
           # Configure git
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Remove existing-wiki directory (cloned for merging, not needed in version branch)
+          if (Test-Path "./existing-wiki") {
+            Write-Host "Removing existing-wiki directory..."
+            Remove-Item -Recurse -Force "./existing-wiki"
+          }
 
           # Check if branch exists on remote
           $branchExists = git ls-remote --heads origin $branchName 2>$null

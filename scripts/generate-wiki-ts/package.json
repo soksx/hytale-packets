@@ -1,0 +1,23 @@
+{
+  "name": "hytale-protocol-wiki",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "bun build src/generate-wiki.ts --outdir dist --target bun",
+    "generate": "bun run dist/generate-wiki.js",
+    "dev": "bun run src/generate-wiki.ts",
+    "dev:ai": "bun run src/generate-wiki.ts --protocol-dir ../../protocol --output-dir ../../wiki-test --version test --json"
+  },
+  "dependencies": {
+    "tree-sitter": "^0.22.4",
+    "tree-sitter-java": "^0.23.5",
+    "ai": "^6.0.39",
+    "zod": "^4.3.5",
+    "@openrouter/ai-sdk-provider": "^1.5.4"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^20.19.30",
+    "typescript": "^5.9.3"
+  }
+}
